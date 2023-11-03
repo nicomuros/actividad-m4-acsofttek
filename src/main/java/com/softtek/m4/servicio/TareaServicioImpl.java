@@ -6,9 +6,8 @@ import com.softtek.m4.modelo.dto.TareaResponseDTO;
 import com.softtek.m4.modelo.mapper.TareaMapper;
 import com.softtek.m4.modelo.entidades.Tarea;
 import com.softtek.m4.repositorio.TareaDao;
+import java.util.Date;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public class TareaServicioImpl implements TareaServicio{
     
@@ -21,10 +20,14 @@ public class TareaServicioImpl implements TareaServicio{
     }
 
     @Override
+    // TODO: Validar los datos. Excepciones personalizadas
     public void altaTarea(TareaRequestDTO request) {
         // Se convierte la solicitud en una entidad
         Tarea tarea = mapper.convertirATarea(request);
         
+        // Se incluye la fecha en la que se creó la tarea
+        
+        tarea.setFechaCreacion(new Date());
         // Solicitud al repositorio para dar de alta a la entidad
         tareaDao.create(tarea);
     }
@@ -34,7 +37,7 @@ public class TareaServicioImpl implements TareaServicio{
         // Se solicita al repositorio la lista de tareas
         List<Tarea> listaDeTareas = tareaDao.findTareaEntities();
         
-        // Se convierte la entidad a una lista de objetos DTO
+        // Se convierte la lista de entidades a una lista de objetos DTO
         List<TareaResponseDTO> listaDeTareasDTO = 
                 mapper.convertirADtoList(listaDeTareas);
         
@@ -51,14 +54,39 @@ public class TareaServicioImpl implements TareaServicio{
     public void modificarTarea(Integer id, TareaRequestDTO request) 
             throws NonexistentEntityException, Exception{
         
-        // Se convierte la solicitud en una entidad
-        Tarea tarea = mapper.convertirATarea(request);
+        // Recuperar la tarea original desde la base de datos
+        Tarea tarea = tareaDao.findTarea(id);
         
-        // Se añade el ID a la tarea
-        tarea.setId(id);
+        // Actualizar solo los campos que sean no-nulos y que sean diferentes a los originales.
+        // Esta comprobación es necesaria para no sobreescribir datos antiguos con valores nulos
         
-        // Se solicita al repositorio modificar la tarea
-        tareaDao.edit(tarea);
+        // Variable para control de cambios
+        boolean cambio = false;
+        
+        
+        if (request.getTitulo() != null 
+                && !request.getTitulo().equals(tarea.getTitulo())){
+            
+            // Si los valores nuevos son no-nulos y diferentes, actualizo el campo
+            tarea.setTitulo(request.getTitulo());
+            cambio = true;
+        }
+        
+        if (request.getDescripcion() != null
+                && !request.getDescripcion().equals(tarea.getDescripcion())){
+            
+            // Si los valores nuevos son no-nulos y diferentes, actualizo el campo
+            tarea.setDescripcion(request.getTitulo());
+            cambio = true;
+        }
+        
+        if (cambio == true){
+            // Se actualiza la fecha de modificación
+            tarea.setFechaUltimaModificacion(new Date());
+
+            // Se solicita al repositorio modificar la tarea
+            tareaDao.edit(tarea);
+        }
         
     }
 

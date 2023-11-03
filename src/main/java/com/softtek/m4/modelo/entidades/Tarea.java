@@ -1,5 +1,6 @@
 package com.softtek.m4.modelo.entidades;
 import java.io.Serializable;
+import java.util.Date;
 import java.util.Objects;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -21,18 +22,19 @@ public class Tarea implements Serializable {
     private String titulo;
     @Column(name = "descripcion")
     private String descripcion;
-
+    @Column(name = "fecha_creacion")
+    private Date fechaCreacion;
+    @Column(name = "fecha_ultima_modificacion")
+    private Date fechaUltimaModificacion;
+    
     public Tarea(){}
 
-    public Tarea(Integer id, String titulo, String descripcion) {
+    public Tarea(Integer id, String titulo, String descripcion, Date fechaCreacion, Date fechaUltimaModificacion) {
         this.id = id;
         this.titulo = titulo;
         this.descripcion = descripcion;
-    }
-
-    public Tarea(String titulo, String descripcion) {
-        this.titulo = titulo;
-        this.descripcion = descripcion;
+        this.fechaCreacion = fechaCreacion;
+        this.fechaUltimaModificacion = fechaUltimaModificacion;
     }
 
     public Integer getId() {
@@ -59,25 +61,62 @@ public class Tarea implements Serializable {
         this.descripcion = descripcion;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Tarea tarea = (Tarea) o;
-        return Objects.equals(id, tarea.id) && Objects.equals(titulo, tarea.titulo) && Objects.equals(descripcion, tarea.descripcion);
+    public Date getFechaCreacion() {
+        return fechaCreacion;
+    }
+
+    public void setFechaCreacion(Date fechaCreacion) {
+        this.fechaCreacion = fechaCreacion;
+    }
+
+    public Date getFechaUltimaModificacion() {
+        return fechaUltimaModificacion;
+    }
+
+    public void setFechaUltimaModificacion(Date fechaUltimaModificacion) {
+        this.fechaUltimaModificacion = fechaUltimaModificacion;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, titulo, descripcion);
+        int hash = 7;
+        hash = 83 * hash + Objects.hashCode(this.id);
+        hash = 83 * hash + Objects.hashCode(this.titulo);
+        hash = 83 * hash + Objects.hashCode(this.descripcion);
+        hash = 83 * hash + Objects.hashCode(this.fechaCreacion);
+        hash = 83 * hash + Objects.hashCode(this.fechaUltimaModificacion);
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final Tarea other = (Tarea) obj;
+        if (!Objects.equals(this.titulo, other.titulo)) {
+            return false;
+        }
+        if (!Objects.equals(this.descripcion, other.descripcion)) {
+            return false;
+        }
+        if (!Objects.equals(this.id, other.id)) {
+            return false;
+        }
+        if (!Objects.equals(this.fechaCreacion, other.fechaCreacion)) {
+            return false;
+        }
+        return Objects.equals(this.fechaUltimaModificacion, other.fechaUltimaModificacion);
     }
 
     @Override
     public String toString() {
-        return "Tarea{" +
-                "id=" + id +
-                ", titulo='" + titulo + '\'' +
-                ", descripcion='" + descripcion + '\'' +
-                '}';
-    }
+        return "Tarea{" + "id=" + id + ", titulo=" + titulo + ", descripcion=" + descripcion + ", fechaCreacion=" + fechaCreacion + ", fechaUltimaModificacion=" + fechaUltimaModificacion + '}';
+    }        
 }
