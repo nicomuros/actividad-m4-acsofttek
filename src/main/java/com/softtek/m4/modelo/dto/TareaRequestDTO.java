@@ -2,16 +2,16 @@ package com.softtek.m4.modelo.dto;
 
 import java.util.Objects;
 
-// TODO: Documentar
+/**
+ * Objeto de Transferencia de Datos (DTO) utilizado para transportar información 
+ * en las solicitudes de <b>creación</b> y <b>modificación</b> de Tareas.
+ * Este DTO contiene datos como el título y la descripción de una Tarea.
+ */
 public class TareaRequestDTO {
     private String titulo;
     private String descripcion;
     
     public TareaRequestDTO(){}
-    public TareaRequestDTO(String titulo, String descripcion){
-        this.titulo = titulo;
-        this.descripcion = descripcion;
-    }
 
     public String getTitulo() {
         return titulo;
@@ -31,8 +31,7 @@ public class TareaRequestDTO {
 
     @Override
     public int hashCode() {
-        int hash = 3;
-        return hash;
+        return 3;
     }
 
     @Override

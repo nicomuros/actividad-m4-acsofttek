@@ -1,5 +1,6 @@
 package com.softtek.m4.vista;
 
+import com.softtek.m4.exceptions.DatosInvalidosException;
 import com.softtek.m4.modelo.dto.TareaRequestDTO;
 import com.softtek.m4.modelo.dto.TareaResponseDTO;
 import com.softtek.m4.modelo.mapper.TareaMapper;
@@ -7,8 +8,10 @@ import com.softtek.m4.repositorio.TareaDao;
 import com.softtek.m4.repositorio.TareaJpaController;
 import com.softtek.m4.servicio.TareaServicio;
 import com.softtek.m4.servicio.TareaServicioImpl;
+import java.awt.Color;
 import javax.swing.table.DefaultTableModel;
 import java.util.List;
+import javax.swing.ListSelectionModel;
 
 public class TareaForm extends javax.swing.JFrame {
     
@@ -35,7 +38,13 @@ public class TareaForm extends javax.swing.JFrame {
     private void actualizarTabla(){
         
         // Instanciamos un modelo de tabla donde se almacenaran los datos
-        DefaultTableModel modeloTabla = new DefaultTableModel(new Object[]{"ID", "Título", "Descripción"}, 0);
+        DefaultTableModel modeloTabla = new DefaultTableModel(
+                new Object[]{"ID", "Título", "Descripción"}, 0){
+                    @Override
+                    public boolean isCellEditable(int row, int column){
+                        return false;
+                    }
+                };
         
         // Se limpian todas las filas de la tabla
         modeloTabla.setRowCount(0);
@@ -56,7 +65,10 @@ public class TareaForm extends javax.swing.JFrame {
                 }
             );
             
+            // Se aplican las columnas
             tablaTareas.setModel(modeloTabla);
+            
+            // Configuración de width de columnas
             if (tablaTareas.getColumnModel().getColumnCount() > 0) {
                 tablaTareas.getColumnModel().getColumn(0).setMinWidth(40);
                 tablaTareas.getColumnModel().getColumn(0).setPreferredWidth(40);
@@ -65,6 +77,9 @@ public class TareaForm extends javax.swing.JFrame {
                 tablaTareas.getColumnModel().getColumn(1).setPreferredWidth(150);
                 tablaTareas.getColumnModel().getColumn(1).setMaxWidth(150);
             }
+            
+            // Conf: no se podrán seleccionar más de 1 fila
+            tablaTareas.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         } catch(Exception e){
             mostrarError(e);
         }
@@ -81,11 +96,13 @@ public class TareaForm extends javax.swing.JFrame {
     // Mostrar mensajes de error
     private void mostrarError(Exception e){
         resultadoLabel.setText("Error: " + e.getMessage());
+        resultadoLabel.setForeground(Color.RED);
     }
     
+    // Mostrar mensaje de éxito
     private void mostrarExito(String mensaje){
         resultadoLabel.setText("Exito: " + mensaje);
-
+        resultadoLabel.setForeground(Color.BLACK);
     }
     
     // Metodo para agregar tarea
@@ -95,39 +112,42 @@ public class TareaForm extends javax.swing.JFrame {
         String titulo = tituloTextField.getText();
         String descripcion = descripcionTextField.getText();
         
+        // Preparación de la solicitud de alta
         TareaRequestDTO request = new TareaRequestDTO();
+        request.setTitulo(titulo);
+        request.setDescripcion(descripcion);
         
         try{
-            request.setTitulo(titulo);
-            request.setDescripcion(descripcion);
+            // Se solicita al servicio el alta
             tareaServicio.altaTarea(request);
+            
+            // Si no hay errores, se muestra mensaje de éxito y se actualiza.
             mostrarExito("Se agrego la tarea correctamente");
+            actualizarCampos();
         } catch (Exception e){
             mostrarError(e);
-        } finally{
-            actualizarCampos();
-        }
+        } 
     }
     
     // Metodo para modificar tarea
     private void modificarTarea(){
         
-        // Obtener el ID de la tarea a modificar
-        Integer id = obtenerIdSeleccionado();
-        
-        // Obtener datos actualizados
-        String titulo = tituloTextField.getText();
-        String descripcion = descripcionTextField.getText();
-        
-        // Construcción de la request
-        TareaRequestDTO request = new TareaRequestDTO();
-        request.setTitulo(titulo);
-        request.setDescripcion(descripcion);
-        
-        // Envío de la request al servicio
         try{
+            // Obtener el ID de la tarea a modificar
+            Integer id = obtenerIdSeleccionado();
+
+            // Obtener datos actualizados
+            String titulo = tituloTextField.getText();
+            String descripcion = descripcionTextField.getText();
+
+            // Construcción de la request
+            TareaRequestDTO request = new TareaRequestDTO();
+            request.setTitulo(titulo);
+            request.setDescripcion(descripcion);
+
+            // Envío de la request al servicio
             tareaServicio.modificarTarea(id, request);
-            mostrarExito("La tarea se modificó exitosamente");
+            mostrarExito("La tarea se modificó exitosamente.");
             actualizarCampos();
         } catch (Exception e){
             mostrarError(e);
@@ -135,11 +155,11 @@ public class TareaForm extends javax.swing.JFrame {
     }
     
     private void eliminarTarea(){
-        // Obtener id seleccionado
-        Integer id = obtenerIdSeleccionado();
-        
-        // Se intenta eliminar la tarea
         try{
+            // Obtener id seleccionado
+            Integer id = obtenerIdSeleccionado();
+
+            // Se envía la solicitud de baja
             tareaServicio.bajaTarea(id);
             mostrarExito("Se elimino correctamente la tarea");
             actualizarCampos();
@@ -149,10 +169,18 @@ public class TareaForm extends javax.swing.JFrame {
     }
     
     private Integer obtenerIdSeleccionado(){
+        
+        // Obtener el último id seleccionado
         String id = idLabel.getText();
-        Integer idInt = Integer.valueOf(id);
-        return idInt;
+        
+        // Verificar que no esté vacío
+        if (id.isBlank()) throw new DatosInvalidosException(
+                "No se seleccionó ninguna tarea.");
+        
+        // Se retorna el ID
+        return Integer.valueOf(id);
     }
+    
     // Se maneja el click de la tabla. Se rellenan los textField con los datos
     private void manejarClickTabla(){
         int filaSeleccionada = tablaTareas.getSelectedRow();
@@ -193,34 +221,50 @@ public class TareaForm extends javax.swing.JFrame {
 
         jPanel2.setBorder(javax.swing.BorderFactory.createTitledBorder("Controles"));
 
+        agregarBtn.setFont(new java.awt.Font("Ubuntu", 0, 12)); // NOI18N
         agregarBtn.setText("Agregar tarea");
+        agregarBtn.setNextFocusableComponent(modificarBtn);
         agregarBtn.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 agregarBtnActionPerformed(evt);
             }
         });
 
+        modificarBtn.setFont(new java.awt.Font("Ubuntu", 0, 12)); // NOI18N
         modificarBtn.setText("Modificar Tarea");
+        modificarBtn.setNextFocusableComponent(eliminarBtn);
         modificarBtn.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 modificarBtnMouseClicked(evt);
             }
         });
 
+        eliminarBtn.setFont(new java.awt.Font("Ubuntu", 0, 12)); // NOI18N
         eliminarBtn.setText("Eliminar Tarea");
+        eliminarBtn.setNextFocusableComponent(tituloTextField);
         eliminarBtn.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 eliminarBtnMouseClicked(evt);
             }
         });
 
+        jLabel1.setFont(new java.awt.Font("Ubuntu", 0, 12)); // NOI18N
         jLabel1.setText("ID:");
 
+        idLabel.setFont(new java.awt.Font("Ubuntu", 0, 11)); // NOI18N
         idLabel.setText(" ");
 
+        jLabel3.setFont(new java.awt.Font("Ubuntu", 0, 12)); // NOI18N
         jLabel3.setText("Título:");
 
+        tituloTextField.setFont(new java.awt.Font("Ubuntu", 0, 11)); // NOI18N
+        tituloTextField.setNextFocusableComponent(descripcionTextField);
+
+        jLabel4.setFont(new java.awt.Font("Ubuntu", 0, 12)); // NOI18N
         jLabel4.setText("Descripción:");
+
+        descripcionTextField.setFont(new java.awt.Font("Ubuntu", 0, 11)); // NOI18N
+        descripcionTextField.setNextFocusableComponent(agregarBtn);
 
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
@@ -267,6 +311,7 @@ public class TareaForm extends javax.swing.JFrame {
                 .addContainerGap(16, Short.MAX_VALUE))
         );
 
+        tablaTareas.setFont(new java.awt.Font("Ubuntu", 0, 11)); // NOI18N
         tablaTareas.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
 
@@ -298,8 +343,9 @@ public class TareaForm extends javax.swing.JFrame {
             tablaTareas.getColumnModel().getColumn(1).setMaxWidth(150);
         }
 
-        jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder(new javax.swing.border.MatteBorder(null), "Resultado"));
+        jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder("Resultado"));
 
+        resultadoLabel.setFont(new java.awt.Font("Ubuntu", 0, 12)); // NOI18N
         resultadoLabel.setText("Aguardando acción del usuario");
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
@@ -313,13 +359,12 @@ public class TareaForm extends javax.swing.JFrame {
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addGroup(jPanel1Layout.createSequentialGroup()
                 .addComponent(resultadoLabel)
-                .addContainerGap())
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
-        jLabel6.setFont(new java.awt.Font("Ubuntu", 1, 36)); // NOI18N
+        jLabel6.setFont(new java.awt.Font("Ubuntu", 0, 36)); // NOI18N
         jLabel6.setText("TODO LIST");
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -348,8 +393,8 @@ public class TareaForm extends javax.swing.JFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addContainerGap())
+                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         pack();
@@ -402,9 +447,12 @@ public class TareaForm extends javax.swing.JFrame {
         java.awt.EventQueue.invokeLater(new Runnable() {
             @Override
             public void run() {
+                // Para entornos de prueba, se instancian las dependencias en el run
                 TareaDao tareaDao = new TareaJpaController();
                 TareaMapper mapper = new TareaMapper();
-                TareaServicio tareaServicio = new TareaServicioImpl(tareaDao, mapper);
+                TareaServicio tareaServicio = 
+                        new TareaServicioImpl(tareaDao, mapper);
+                
                 new TareaForm(tareaServicio).setVisible(true);
             }
         });

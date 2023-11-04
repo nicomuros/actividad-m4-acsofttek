@@ -1,7 +1,12 @@
 package com.softtek.m4.modelo.dto;
 import java.util.Objects;
 
-// TODO: Documentar
+/**
+ * Objeto de Transferencia de Datos (DTO) para representar una Tarea en las 
+ * respuestas de las solicitudes de listado de Tareas.
+ * Este DTO contiene información sobre la identificación, el título y la
+ * descripción de una Tarea.
+ */
 public class TareaResponseDTO {
     
     private Integer id;
@@ -9,11 +14,6 @@ public class TareaResponseDTO {
     private String descripcion;
     
     public TareaResponseDTO(){}
-    public TareaResponseDTO(Integer id, String titulo, String descripcion){
-        this.id = id;
-        this.titulo = titulo;
-        this.descripcion = descripcion;
-    }
 
     public Integer getId() {
         return id;
@@ -41,8 +41,7 @@ public class TareaResponseDTO {
 
     @Override
     public int hashCode() {
-        int hash = 7;
-        return hash;
+        return 7;
     }
 
     @Override
