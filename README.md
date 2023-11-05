@@ -10,9 +10,9 @@ Este proyecto fue realizado como presentación para la **Academia Java + Springb
 - [Arquitectura de la Aplicación](#arquitectura-de-la-aplicación)
     - [Patrones de Diseño](#patrones-de-diseño)
         - [Estructura N-Tier](#estructura-n-tier)
-        - [Inyección de Dependencias](#inyeccion-de-dependencias)
-        - [DAO](#parton-dao)
-        - [DTO](#parton-dto)
+        - [Inyección de Dependencias](#patrón-de-inyección-de-dependencias)
+        - [DAO](#patrón-dao)
+        - [DTO](#patrón-dto)
 
 - # Funcionamiento de la aplicacion
 ![Funcionamiento de la aplicacion](https://github.com/nicomuros/actividad-m4-acsofttek/blob/main/capturas/Comprobacion%20MySQL.gif?raw=true)  
