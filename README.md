@@ -14,7 +14,7 @@ Este proyecto fue realizado como presentación para la **Academia Java + Springb
         - [DAO](#patrón-dao)
         - [DTO](#patrón-dto)
 
-- # Funcionamiento de la aplicacion
+# Funcionamiento de la aplicacion
 ![Funcionamiento de la aplicacion](https://github.com/nicomuros/actividad-m4-acsofttek/blob/main/capturas/Comprobacion%20MySQL.gif?raw=true)  
 En la grabación superior se pueden observar las distintas etapas del CRUD, junto con el manejo de errores y el feedback de los mismos al usuario:
 * **Create:** Para poder realizar la carga de datos con éxito a la base de datos, es necesario que el usuario ingrese de forma **obligatoria**, tanto el título como la descripción de la tarea (tampoco puede ser una cadena de espacios en blanco). En la grabación se puede observar como, en el momento en que el usuario intenta ingresar una tarea con formatos invalidos se muestra un mensaje de error.
