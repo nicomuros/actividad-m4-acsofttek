@@ -16,6 +16,7 @@ public class TareaJpaController implements Serializable, TareaDao {
 
     private EntityManagerFactory emf = null;
 
+    // Se provee la instancia del EntityManager
     public EntityManager getEntityManager() {
         return emf.createEntityManager();
     }
